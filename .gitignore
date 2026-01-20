@@ -3,3 +3,6 @@ Data/raw/*.gz
 Data/raw/*.zip
 .kaggle/
 .env
+Data/credit_scoring.dbData/credit_scoring.db
+/workspaces/final_project_creditscoring/Data/credit_scoring.db
+Data/*
