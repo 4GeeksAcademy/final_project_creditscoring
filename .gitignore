@@ -1,0 +1,5 @@
+Data/raw/*.csv
+Data/raw/*.gz
+Data/raw/*.zip
+.kaggle/
+.env
