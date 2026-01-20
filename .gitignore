@@ -6,3 +6,12 @@ Data/raw/*.zip
 Data/credit_scoring.dbData/credit_scoring.db
 /workspaces/final_project_creditscoring/Data/credit_scoring.db
 Data/*
+
+# Kaggle
+*.csv
+*.csv.gz
+
+# BFG / repos espejo
+repo-espejo.git/
+repo-espejo.git.bfg-report/
+bfg.jar
