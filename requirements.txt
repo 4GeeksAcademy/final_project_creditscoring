@@ -4,3 +4,5 @@ matplotlib
 seaborn
 scikit-learn
 kagglehub
+python-dotenv
+pandas requests python-dotenv
