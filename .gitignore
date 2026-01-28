@@ -5,6 +5,7 @@ Data/raw/*.zip
 .env
 Data/credit_scoring.db
 /workspaces/final_project_creditscoring/Data/credit_scoring.db
+<<<<<<< HEAD
 # Kaggle
 *.csv
 *.csv.gz
@@ -13,3 +14,6 @@ repo-espejo.git/
 repo-espejo.git.bfg-report/
 bfg.jar
 Data/kaggle.json
+=======
+Data/*
+>>>>>>> origin/EDAv1
