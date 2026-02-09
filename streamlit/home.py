@@ -8,7 +8,7 @@ def main():
     )
 
     # Encabezado principal
-    st.title("🚀 Portal de Credit Scoring: Sebas, Dorota y Johan")
+    st.title("💳 Evaluación de riesgo crediticio")
     st.markdown("""
     Bienvenid@ al sistema de evaluación de riesgo crediticio basado en modelos de Machine Learning.
     Este portal permite analizar la viabilidad de préstamos utilizando datos históricos reales.
