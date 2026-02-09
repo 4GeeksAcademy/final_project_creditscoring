@@ -1,65 +1,59 @@
 import streamlit as st
-from utils import FEATURES_CONSENSUS
+import sys
+import os
+
+# 1. Ajuste de ruta para encontrar utils.py en la raíz del proyecto
+# Esto sube un nivel desde /pages/ hacia la raíz
+root_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+if root_path not in sys.path:
+    sys.path.append(root_path)
+
+# 2. Ahora intentamos importar desde utils
+try:
+    from utils import FEATURES_CONSENSUS
+except ImportError:
+    st.error("⚠️ No se pudo cargar 'utils.py'. Verifica que esté en la raíz del repositorio.")
+    FEATURES_CONSENSUS = []
 
 def main():
     st.set_page_config(page_title="Diccionario de Variables", page_icon="📊", layout="wide")
 
-    # --- TÍTULO Y DESCRIPCIÓN INFORMATIVA ---
-    st.title("📖 Diccionario de Características (Features)")
+    st.title("📖 Diccionario de Características")
     st.markdown("""
-    En esta sección, puedes explorar las variables que nuestro modelo de Machine Learning utiliza para calcular 
-    el **Credit Scoring**. Cada una de estas características ha sido seleccionada tras un análisis exhaustivo (EDA), 
-    identificando su impacto directo en la probabilidad de cumplimiento de pago.
-    
-    **Instrucciones:** Selecciona una variable del menú desplegable para entender qué representa y por qué es 
-    importante para el análisis de riesgo de LendingClub.
+    Esta sección funciona como un **manual de referencia** para entender los datos que alimentan nuestro modelo.
+    Cada variable seleccionada tiene un impacto estadístico en la predicción del riesgo.
     """)
 
     st.divider()
 
-    # --- DICCIONARIO DE EXPLICACIONES ---
-    # He creado descripciones amigables para las variables principales
+    # --- DICCIONARIO DE DESCRIPCIONES ---
     descriptions = {
-        'int_rate': "Tasa de interés del préstamo. Refleja el riesgo asignado por el prestamista.",
-        'dti': "Ratio Deuda/Ingresos. Indica qué porcentaje de los ingresos mensuales del deudor se destina al pago de deudas.",
-        'annual_inc': "Ingresos anuales reportados por el solicitante al momento del registro.",
-        'sub_grade': "Sub-calificación detallada de LendingClub (ej. A1, B3) basada en el historial del cliente.",
-        'fico_range_low': "El límite inferior del rango de puntaje FICO del cliente proporcionado por la agencia de crédito.",
-        'loan_amnt': "Monto total del préstamo solicitado por el cliente.",
-        'term': "Número de pagos del préstamo (36 o 60 meses).",
-        'revol_util': "Tasa de utilización de líneas de crédito rotativas (cuánto crédito usa frente al límite disponible).",
-        'installment': "La cuota mensual que el deudor debe pagar si el préstamo es aprobado.",
-        'emp_length': "Años de antigüedad en el empleo actual (0 a 10+ años).",
-        'ME_inflation_cpi': "Variable Macroeconómica: Índice de Precios al Consumidor. Mide la inflación del periodo.",
-        'ME_unemployment_rate': "Variable Macroeconómica: Tasa de desempleo al momento del préstamo.",
-        'ME_fed_funds_rate': "Variable Macroeconómica: Tasa de interés de la Reserva Federal (EE.UU.)."
+        'int_rate': "Tasa de interés del préstamo. Refleja el riesgo asignado; a mayor tasa, mayor probabilidad de impago percibida.",
+        'dti': "Ratio Deuda/Ingresos. Indica qué porcentaje de los ingresos del deudor se destinan al pago de deudas existentes.",
+        'annual_inc': "Ingresos anuales reportados. Es la base de la capacidad financiera del solicitante.",
+        'fico_range_low': "Puntaje FICO mínimo. Es el indicador estándar de salud crediticia en EE.UU.",
+        'term': "Plazo del préstamo (36 o 60 meses). Los plazos más largos suelen tener tasas de default más altas.",
+        'ME_inflation_cpi': "Inflación (CPI). Factor macro que reduce el poder adquisitivo y la capacidad de pago real.",
+        'ME_unemployment_rate': "Tasa de Desempleo. Un contexto de alto desempleo aumenta el riesgo sistémico del portafolio."
     }
 
-    # --- INTERFAZ DE SELECCIÓN ---
-    col1, col2 = st.columns([1, 2])
+    # --- INTERFAZ ---
+    col1, col2 = st.columns([1, 1.5])
 
     with col1:
-        st.subheader("Selección")
-        seleccion = st.selectbox(
-            "Busca una característica:",
-            options=FEATURES_CONSENSUS,
-            help="Escribe o selecciona una variable de la lista."
-        )
+        st.subheader("🔍 Selecciona una variable")
+        seleccion = st.selectbox("Explorar lista:", FEATURES_CONSENSUS)
+        
+        desc = descriptions.get(seleccion, "Variable técnica utilizada para mejorar la precisión de la predicción de riesgo.")
+        st.info(f"**¿Qué significa?**\n\n{desc}")
 
     with col2:
-        st.subheader("Explicación")
-        if seleccion in descriptions:
-            st.success(f"### {seleccion}")
-            st.write(descriptions[seleccion])
-        else:
-            # Mensaje genérico para las variables que no tengan descripción manual aún
-            st.info(f"### {seleccion}")
-            st.write("Esta variable forma parte del conjunto de datos seleccionado para el modelo. Representa métricas específicas del historial crediticio o condiciones macroeconómicas del entorno de LendingClub.")
-
-    st.divider()
-    
-    # --- PIE DE PÁGINA ---
-    st.caption("Nota: Las variables con prefijo 'ME_' corresponden a datos macroeconómicos externos vinculados por fecha.")
+        st.subheader("📈 Análisis Visual")
+        # Placeholder para futura gráfica
+        st.markdown(f"**Comportamiento de {seleccion} en el Dataset**")
+        st.info("Aquí puedes integrar un gráfico de importancia de variables o una distribución de valores.")
+        # Ejemplo de gráfico rápido
+        st.bar_chart([5, 12, 30, 25, 10])
 
 if __name__ == "__main__":
     main()
