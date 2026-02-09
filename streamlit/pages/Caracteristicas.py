@@ -2,76 +2,81 @@ import streamlit as st
 import sys
 import os
 import matplotlib.pyplot as plt
-import pandas as pd
 
-# Intentamos importar SHAP de forma segura
-try:
-    import shap
-except ImportError:
-    st.error("La librería 'shap' no está instalada. Agrégala a requirements.txt")
-
-# --- 1. CONFIGURACIÓN DE RUTAS ---
+# --- 1. ARREGLO DE RUTAS (Crucial para Streamlit Cloud) ---
+# Esto permite que la página encuentre 'utils.py' subiendo un nivel
 root_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 if root_path not in sys.path:
     sys.path.append(root_path)
 
+# --- 2. IMPORTACIONES SEGUROS ---
 try:
     from utils import FEATURES_CONSENSUS
 except ImportError:
-    FEATURES_CONSENSUS = ["int_rate", "dti", "annual_inc", "fico_range_low"]
+    # Si falla el import, definimos una lista de emergencia para que no se caiga la app
+    FEATURES_CONSENSUS = ['int_rate', 'dti', 'annual_inc', 'fico_range_low', 'term']
+
+try:
+    import shap
+    SHAP_AVAILABLE = True
+except ImportError:
+    SHAP_AVAILABLE = False
 
 def main():
-    st.set_page_config(page_title="Diccionario y SHAP", page_icon="📊", layout="wide")
+    st.set_page_config(page_title="Análisis de Características", page_icon="📊", layout="wide")
 
-    st.title("📊 Diccionario de Variables e Impacto del Modelo")
+    # --- TÍTULO E INTRODUCCIÓN ---
+    st.title("📊 Diccionario de Variables e Impacto")
     st.markdown("""
-    Explora las definiciones de las variables y su impacto global en la predicción del riesgo.
+    Esta sección funciona como un **diccionario interactivo**. Aquí explicamos qué significa cada 
+    variable que el modelo de Machine Learning analiza para determinar el riesgo de un crédito.
     """)
-
-    # --- 2. DICCIONARIO ---
-    descriptions = {
-        'int_rate': "Tasa de interés del préstamo. A mayor tasa, mayor riesgo percibido.",
-        'dti': "Ratio Deuda/Ingresos. Porcentaje de ingresos destinado al pago de deudas.",
-        'annual_inc': "Ingresos anuales brutos reportados por el solicitante.",
-        'fico_range_low': "Puntaje FICO mínimo del cliente. Indicador clave de salud crediticia.",
-        'term': "Plazo del préstamo (36 o 60 meses).",
-        'ME_inflation_cpi': "Variable Macroeconómica: Índice de inflación (CPI).",
-        'ME_unemployment_rate': "Variable Macroeconómica: Tasa de desempleo vigente."
-    }
-
-    col_box, col_info = st.columns([1, 2])
-    with col_box:
-        st.subheader("🔍 Explorador")
-        seleccion = st.selectbox("Selecciona una característica:", FEATURES_CONSENSUS)
-        
-    with col_info:
-        st.subheader("💡 Definición")
-        desc = descriptions.get(seleccion, "Variable técnica seleccionada durante el EDA.")
-        st.info(f"**{seleccion}:** {desc}")
 
     st.divider()
 
-    # --- 3. SECCIÓN DE SHAP ---
-    st.header("🎯 Main Drivers of Default Risk (SHAP)")
-    
-    # Intentamos generar el gráfico SHAP
-    # Nota: Aquí asumo que eventualmente cargarás tu 'final_model' y 'X_test_sel'
-    if 'shap' in sys.modules:
-        try:
-            # BLOQUE PARA EL GRÁFICO
-            st.write("Impacto de las variables en la decisión de riesgo:")
-            
-            # Si tienes los datos listos, descomenta estas líneas y ajusta los nombres:
-            # fig, ax = plt.subplots(figsize=(10, 6))
-            # shap.summary_plot(shap_values, X_test_sel, plot_type="bar", show=False)
-            # st.pyplot(plt.gcf())
-            
-            st.warning("⚠️ Gráfico en espera: Carga tu modelo y datos para visualizar el SHAP real.")
-            
-        except Exception as e:
-            st.error(f"Error al procesar SHAP: {e}")
+    # --- SECCIÓN 1: DICCIONARIO DE VARIABLES ---
+    # Diccionario con explicaciones humanas
+    descriptions = {
+        'int_rate': "Tasa de interés del préstamo. Refleja el riesgo asignado por el prestamista.",
+        'dti': "Ratio Deuda/Ingresos. Indica qué porcentaje de los ingresos se destina a pagar deudas.",
+        'annual_inc': "Ingresos anuales brutos reportados por el solicitante.",
+        'fico_range_low': "Puntaje FICO mínimo del cliente. Es el indicador estándar de salud crediticia.",
+        'term': "Plazo del préstamo (36 o 60 meses).",
+        'installment': "La cuota mensual que el deudor debe pagar.",
+        'ME_inflation_cpi': "Variable Macroeconómica: Índice de inflación (CPI).",
+        'ME_unemployment_rate': "Variable Macroeconómica: Tasa de desempleo vigente.",
+        'ME_fed_funds_rate': "Variable Macroeconómica: Tasa de interés de la Reserva Federal."
+    }
+
+    col1, col2 = st.columns([1, 2])
+
+    with col1:
+        st.subheader("🔍 Selecciona una variable")
+        seleccion = st.selectbox("Explorar lista consensuada:", FEATURES_CONSENSUS)
+
+    with col2:
+        st.subheader("💡 ¿Qué significa?")
+        detalle = descriptions.get(seleccion, "Variable técnica seleccionada durante el proceso de análisis (EDA) para mejorar la precisión del modelo.")
+        st.info(f"**{seleccion}:** {detalle}")
+
+    st.divider()
+
+    # --- SECCIÓN 2: IMPACTO SHAP ---
+    st.header("🎯 Factores Clave de Riesgo (SHAP)")
+    st.write("A continuación se muestra el impacto global de las variables en la predicción:")
+
+    # Intentamos buscar el gráfico guardado en la raíz
+    img_path = os.path.join(root_path, 'shap_summary.png')
+
+    if os.path.exists(img_path):
+        st.image(img_path, caption="Análisis de importancia (SHAP Summary Plot)", use_container_width=True)
     else:
-        st.error("No se pudo cargar SHAP. Revisa la instalación de dependencias.")
+        st.warning("⚠️ No se encontró la imagen 'shap_summary.png'.")
+        st.info("Para visualizar el impacto real, guarda tu gráfico SHAP desde el notebook usando: `plt.savefig('shap_summary.png')` y súbelo a la raíz de tu repositorio.")
+        
+        # Gráfico de barras de ejemplo para que la página no se vea vacía
+        st.bar_chart([10, 25, 45, 30, 15])
+        st.caption("Gráfico de ejemplo (Simulación de importancia de variables)")
 
 if __name__ == "__main__":
     main()
