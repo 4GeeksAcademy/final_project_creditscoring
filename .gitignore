@@ -6,3 +6,4 @@ Data/raw/*.zip
 Data/credit_scoring.dbData/credit_scoring.db
 /workspaces/final_project_creditscoring/Data/credit_scoring.db
 Data/*
+Data/credit_scoring.db
