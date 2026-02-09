@@ -33,12 +33,12 @@ def main():
     with col1:
         st.info("### Explorar Datos")
         st.write("Analiza las variables que más influyen en el riesgo y visualiza el comportamiento de la data.")
-        st.page_link("streamlit/pages/Caracteristicas.py", label="Ir a Características", icon="📊")
+        st.page_link("pages/Caracteristicas.py", label="Ir a Características", icon="📊")
 
     with col2:
         st.success("### Realizar Predicción")
         st.write("Ingresa los datos de un nuevo cliente para obtener su probabilidad de riesgo en tiempo real.")
-        st.page_link("streamlit/pages/Prediccion.py", label="Ir a Predicción", icon="🤖")
+        st.page_link("pages/Prediccion.py", label="Ir a Predicción", icon="🤖")
 
     st.markdown("---")
     st.caption("Proyecto Final - Bootcamp de Data Science 2026")
