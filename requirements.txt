@@ -7,3 +7,6 @@ kagglehub
 streamlit
 shap
 Pillow
+xgboost
+joblib
+scikit-learn
