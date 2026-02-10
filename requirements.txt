@@ -5,8 +5,7 @@ seaborn
 scikit-learn
 kagglehub
 streamlit
+shap
 Pillow
 xgboost
 joblib
-shap>=0.45.0
-numba>=0.59.0
