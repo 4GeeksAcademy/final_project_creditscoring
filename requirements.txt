@@ -9,3 +9,11 @@ shap
 Pillow
 xgboost
 joblib
+streamlit>=1.35.0
+pandas
+numpy
+scikit-learn
+joblib
+xgboost
+shap>=0.45.0
+numba>=0.59.0
