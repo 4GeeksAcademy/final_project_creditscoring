@@ -40,17 +40,60 @@ def main():
     st.divider()
 
     # --- 3. DICCIONARIO DE DEFINICIONES ---
-    descriptions = {
-        'int_rate': "Tasa de interés del préstamo. Refleja el riesgo asignado por el prestamista.",
-        'dti': "Ratio Deuda/Ingresos. Porcentaje de los ingresos mensuales destinado al pago de deudas.",
-        'annual_inc': "Ingresos anuales brutos reportados por el solicitante.",
-        'fico_range_low': "Puntaje FICO mínimo del cliente. Es el indicador estándar de salud crediticia en EE.UU.",
-        'term': "Plazo del préstamo (36 o 60 meses). Plazos más largos suelen tener mayor riesgo.",
-        'installment': "La cuota mensual que el deudor debe pagar si el préstamo es aprobado.",
-        'ME_inflation_cpi': "Variable Macro: Índice de inflación. Afecta el poder adquisitivo del deudor.",
-        'ME_unemployment_rate': "Variable Macro: Tasa de desempleo. Un entorno de alto desempleo eleva el riesgo.",
-        'ME_fed_funds_rate': "Variable Macro: Tasa de la Reserva Federal. Influye en el costo del dinero."
-    }
+descriptions = {
+    'int_rate': "Tasa de interés anual asignada al préstamo. Refleja el nivel de riesgo percibido por la entidad y las condiciones de mercado.",
+    
+    'dti': "Debt-to-Income ratio (DTI). Proporción de los ingresos mensuales del solicitante destinada al pago de deudas. Valores altos indican mayor presión financiera.",
+    
+    'annual_inc': "Ingresos anuales brutos declarados por el solicitante. Es un indicador clave de capacidad de pago.",
+    
+    'sub_grade': "Subcategoría de riesgo crediticio definida por la entidad (por ejemplo, A1–G5). Refina el grade y resume múltiples variables internas.",
+    
+    'revol_util': "Porcentaje de utilización del crédito revolvente disponible. Un uso elevado suele asociarse a mayor riesgo.",
+    
+    'revol_bal': "Saldo total pendiente en líneas de crédito revolvente (como tarjetas de crédito).",
+    
+    'installment': "Cuota mensual fija que el prestatario debe pagar durante la vida del préstamo.",
+    
+    'total_acc': "Número total de cuentas de crédito que el solicitante ha tenido a lo largo de su historial.",
+    
+    'funded_amnt_inv': "Monto del préstamo efectivamente financiado por los inversores.",
+    
+    'funded_amnt': "Monto total del préstamo aprobado y financiado por la entidad.",
+    
+    'loan_amnt': "Monto total solicitado por el cliente en el préstamo.",
+    
+    'total_bc_limit': "Límite total de crédito disponible en cuentas bancarias y tarjetas de crédito.",
+    
+    'ME_pce': "Variable macroeconómica: Índice de gasto en consumo personal (PCE). Refleja el nivel de actividad económica y consumo.",
+    
+    'grade': "Clasificación general de riesgo crediticio del préstamo (A–G), determinada por la entidad.",
+    
+    'fico_range_low': "Valor inferior del rango de puntuación FICO del solicitante. Indicador estándar de solvencia crediticia en EE.UU.",
+    
+    'ME_inflation_cpi': "Variable macroeconómica: Índice de precios al consumidor (CPI). Mide la inflación y afecta el poder adquisitivo.",
+    
+    'mo_sin_old_rev_tl_op': "Número de meses desde la apertura de la cuenta de crédito revolvente más antigua.",
+    
+    'avg_cur_bal': "Saldo promedio actual en las cuentas de crédito del solicitante.",
+    
+    'tot_hi_cred_lim': "Límite máximo histórico de crédito otorgado al solicitante.",
+    
+    'emp_length': "Antigüedad laboral del solicitante. Mayor estabilidad laboral suele asociarse a menor riesgo.",
+    
+    'mths_since_recent_bc': "Meses transcurridos desde la apertura de la cuenta bancaria más reciente.",
+    
+    'ME_unemployment_rate': "Variable macroeconómica: Tasa de desempleo. Un desempleo elevado incrementa el riesgo sistémico.",
+    
+    'ME_fed_funds_rate': "Variable macroeconómica: Tasa de interés de la Reserva Federal. Influye en el costo del crédito y la economía general.",
+    
+    'acc_open_past_24mths': "Número de cuentas de crédito abiertas en los últimos 24 meses.",
+    
+    'inq_last_6mths': "Número de consultas de crédito realizadas en los últimos 6 meses. Muchas consultas pueden indicar estrés financiero.",
+    
+    'term': "Plazo del préstamo en meses (típicamente 36 o 60). Plazos más largos suelen implicar mayor riesgo."
+}
+
 
     # --- INTERFAZ: SELECTBOX Y DEFINICIÓN ---
     col1, col2 = st.columns([1, 2], gap="large")
