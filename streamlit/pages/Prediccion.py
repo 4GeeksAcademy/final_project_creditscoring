@@ -1,140 +1,114 @@
 import streamlit as st
 import pandas as pd
-import numpy as np
 import pickle
-import joblib
 import os
-import sys
+from limpieza import transformar_datos  # Tu función con toda la codificación
+from utils import FEATURES_CONSENSUS    # La lista de columnas del modelo
 
-# --- 1. CONFIGURACIÓN DE RUTAS ---
-current_dir = os.path.dirname(__file__)
-# Subimos dos niveles desde 'streamlit/pages/' para llegar a la raíz
-root_path = os.path.abspath(os.path.join(current_dir, '..', '..'))
-streamlit_path = os.path.join(root_path, 'streamlit')
-
-if streamlit_path not in sys.path:
-    sys.path.append(streamlit_path)
-
-try:
-    from utils import FEATURES_CONSENSUS
-except ImportError:
-    st.error("No se pudo encontrar 'FEATURES_CONSENSUS' en utils.py")
-    FEATURES_CONSENSUS = []
-
-# --- 2. FUNCIÓN DE TRANSFORMACIÓN (ESPEJO DEL NOTEBOOK) ---
-def transformar_datos(df):
-    df_transformed = df.copy()
-
-    # A. Manejo de Fechas (Credit Age)
-    if 'issue_d' in df_transformed.columns and 'earliest_cr_line' in df_transformed.columns:
-        df_transformed['issue_d'] = pd.to_datetime(df_transformed['issue_d'])
-        df_transformed['earliest_cr_line'] = pd.to_datetime(df_transformed['earliest_cr_line'])
-        # Usamos la fecha máxima disponible como referencia
-        ref_date = df_transformed['issue_d'].max()
-        df_transformed['credit_age'] = (ref_date - df_transformed['earliest_cr_line']).dt.days / 365
-
-    # B. Mapeos Ordinales
-    grade_map = {'A': 1, 'B': 2, 'C': 3, 'D': 4, 'E': 5, 'F': 6, 'G': 7}
-    emp_map = {'< 1 year': 0, '1 year': 1, '2 years': 2, '3 years': 3, '4 years': 4,
-               '5 years': 5, '6 years': 6, '7 years': 7, '8 years': 8, '9 years': 9,
-               '10+ years': 10, 'Unknown': -1}
+# --- 1. FUNCIÓN DE PREDICCIÓN (Estilo Profesor) ---
+def realizar_prediccion(data):
+    """Carga el modelo y devuelve las probabilidades"""
+    # Ajusta esta ruta a tu ubicación exacta
+    path = 'notebooks/credit_risk_model_bundle.pkl'
+    with open(path, "rb") as f:
+        bundle = pickle.load(f)
     
-    # Mapeo Sub-Grade (A1-G5)
-    grades = ['A', 'B', 'C', 'D', 'E', 'F', 'G']
-    sub_grades = [f"{g}{i}" for g in grades for i in range(1, 6)]
-    sub_grade_map = {val: i+1 for i, val in enumerate(sub_grades)}
-
-    if 'grade' in df_transformed.columns:
-        df_transformed['grade'] = df_transformed['grade'].map(grade_map)
-    if 'emp_length' in df_transformed.columns:
-        df_transformed['emp_length'] = df_transformed['emp_length'].fillna('Unknown').map(emp_map)
-    if 'sub_grade' in df_transformed.columns:
-        df_transformed['sub_grade'] = df_transformed['sub_grade'].map(sub_grade_map)
-    if 'term' in df_transformed.columns:
-        df_transformed['term'] = df_transformed['term'].apply(lambda x: 1 if '60' in str(x) else 0)
-
-    # C. Indicadores de Faltantes
-    mths_cols = [c for c in df_transformed.columns if c.startswith('mths_since')]
-    for col in mths_cols:
-        df_transformed[f"{col}_missing"] = df_transformed[col].isna().astype(int)
-
-    # D. One-Hot Encoding
-    nom_cols = ['home_ownership', 'verification_status', 'purpose', 
-                'pymnt_plan', 'initial_list_status', 'application_type']
-    df_transformed = pd.get_dummies(df_transformed, columns=[c for c in nom_cols if c in df_transformed.columns], drop_first=True)
-
-    # E. Imputación Numérica
-    try:
-        imputer_path = os.path.join(root_path, 'notebooks', 'num_imputer.pkl')
-        if os.path.exists(imputer_path):
-            imputer = joblib.load(imputer_path)
-            num_cols = df_transformed.select_dtypes(include='number').columns
-            df_transformed[num_cols] = imputer.transform(df_transformed[num_cols])
-    except Exception as e:
-        st.warning(f"Aviso: No se pudo aplicar el imputer ({e}).")
-
-    # F. Alineación Final
-    df_transformed = df_transformed.reindex(columns=FEATURES_CONSENSUS, fill_value=0)
-    return df_transformed.astype(float)
+    # Extraer el modelo si viene en un diccionario
+    model = bundle['model'] if isinstance(bundle, dict) else bundle
+    return model.predict_proba(data)
 
 def main():
-    st.set_page_config(page_title="Simulador de Crédito", page_icon="🤖", layout="wide")
-    st.title("🤖 Predicción de Riesgo Crediticio")
+    st.set_page_config(page_title="Predicción de Riesgo", page_icon="📈", layout="wide")
 
-    # --- 3. CARGA DEL MODELO ---
-    model_path = os.path.join(root_path, 'notebooks', 'credit_risk_model_bundle.pkl')
+    # --- 2. ENCABEZADO Y EXPLICACIÓN ---
+    st.title("🚀 Sistema de Predicción de Riesgo Crediticio")
+    st.markdown("""
+    Bienvenido al módulo de evaluación. Esta herramienta utiliza un modelo de **Machine Learning** entrenado para identificar la probabilidad de incumplimiento (*Default*) de un crédito.
     
-    if not os.path.exists(model_path):
-        st.error(f"No se encontró el modelo en: {model_path}")
-        return
+    ### 📌 Instrucciones:
+    1. **Entrada Manual:** Ideal para evaluar a un cliente individual rápidamente.
+    2. **Carga masiva (CSV):** Permite procesar una base de datos completa de solicitantes.
+    
+    *El sistema aplica automáticamente la ingeniería de variables, imputación de nulos y codificación 
+    de categorías (Grade, Sub-Grade, etc.) necesarias para el modelo.*
+    """)
 
-    with open(model_path, 'rb') as f:
-        model = pickle.load(f)
+    st.divider()
 
-    # --- 4. TABS DE ENTRADA ---
-    tab1, tab2 = st.tabs(["👤 Evaluación Manual", "📂 Carga Masiva (CSV)"])
+    # --- 3. SELECCIÓN DE MÉTODO (Sidebar para evitar errores visuales) ---
+    opcion = st.sidebar.radio("Seleccione Modo de Entrada", ["👤 Individual", "📂 Masivo (CSV)"])
 
-    with tab1:
-        with st.form("manual_entry"):
-            c1, c2, c3 = st.columns(3)
-            with c1:
-                loan_amnt = st.number_input("Monto ($)", value=10000)
+    if opcion == "👤 Individual":
+        st.subheader("📋 Datos del Solicitante")
+        with st.form("manual_form"):
+            col1, col2 = st.columns(2)
+            with col1:
+                loan_amnt = st.number_input("Monto Solicitado ($)", value=10000)
                 term = st.selectbox("Plazo", [" 36 months", " 60 months"])
-                int_rate = st.number_input("Tasa Interés (%)", value=12.0)
-            with c2:
-                annual_inc = st.number_input("Ingreso Anual ($)", value=50000)
-                fico = st.slider("FICO Score", 300, 850, 700)
-                grade = st.selectbox("Grade", ["A", "B", "C", "D", "E", "F", "G"])
-            with c3:
-                sub_grade = st.text_input("Subgrade (A1-G5)", "A1")
-                emp_length = st.selectbox("Antigüedad", ["< 1 year", "1 year", "5 years", "10+ years"])
-                dti = st.number_input("DTI", value=15.0)
-
-            btn = st.form_submit_button("Analizar Riesgo")
-
-        if btn:
-            input_df = pd.DataFrame([{
-                'loan_amnt': loan_amnt, 'term': term, 'int_rate': int_rate,
-                'annual_inc': annual_inc, 'fico_range_low': fico, 'grade': grade,
-                'sub_grade': sub_grade, 'emp_length': emp_length, 'dti': dti
-            }])
-            ready = transformar_datos(input_df)
-            prob = model.predict_proba(ready)[0][1]
+                grade = st.selectbox("Grado (Grade)", ["A", "B", "C", "D", "E", "F", "G"])
+                sub_grade = st.text_input("Sub-Grado (ej. A1, B4)", "B1")
             
-            if prob < 0.3: st.success(f"✅ Riesgo Bajo: {prob:.2%}")
-            elif prob < 0.6: st.warning(f"⚠️ Riesgo Medio: {prob:.2%}")
-            else: st.error(f"🚨 Riesgo Alto: {prob:.2%}")
+            with col2:
+                annual_inc = st.number_input("Ingreso Anual ($)", value=50000)
+                emp_length = st.selectbox("Antigüedad Laboral", ["< 1 year", "1 year", "5 years", "10+ years"])
+                fico = st.slider("Puntaje FICO", 300, 850, 700)
+                dti = st.number_input("DTI (Relación Deuda/Ingreso)", value=15.0)
 
-    with tab2:
-        file = st.file_uploader("Subir CSV de clientes", type="csv")
-        if file:
-            df_csv = pd.read_csv(file)
-            if st.button("Procesar Lote"):
-                processed = transformar_datos(df_csv)
-                preds = model.predict_proba(processed)[:, 1]
-                df_csv['Prob_Default'] = preds
+            submit = st.form_submit_button("🚀 Calcular Riesgo")
+
+        if submit:
+            # Crear DataFrame con los nombres exactos del notebook
+            df_input = pd.DataFrame([{
+                'loan_amnt': loan_amnt, 'term': term, 'grade': grade,
+                'sub_grade': sub_grade, 'annual_inc': annual_inc,
+                'emp_length': emp_length, 'fico_range_low': fico, 'dti': dti
+            }])
+
+            # 1. Transformar (Lógica completa)
+            data_ready = transformar_datos(df_input, FEATURES_CONSENSUS)
+            
+            # 2. Predecir
+            probs = realizar_prediccion(data_ready)
+            riesgo = probs[0][1]
+
+            # 3. Mostrar resultado visual
+            st.subheader("🎯 Resultado del Análisis")
+            if riesgo < 0.3:
+                st.success(f"**CRÉDITO APROBADO** - Probabilidad de Default: {riesgo:.2%}")
+            elif riesgo < 0.6:
+                st.warning(f"**REVISIÓN MANUAL REQUERIDA** - Probabilidad de Default: {riesgo:.2%}")
+            else:
+                st.error(f"**CRÉDITO DENEGADO** - Probabilidad de Default: {riesgo:.2%}")
+
+    else:
+        st.subheader("📂 Carga de Datos por Lote")
+        st.info("Suba un archivo CSV con las columnas originales para obtener predicciones masivas.")
+        
+        archivo = st.file_uploader("Seleccione el archivo CSV", type=["csv"])
+        
+        if archivo is not None:
+            df_csv = pd.read_csv(archivo)
+            st.write("Vista previa de datos cargados:")
+            st.dataframe(df_csv.head(5))
+
+            if st.button("⚙️ Procesar y Predecir"):
+                with st.spinner("Transformando datos y calculando riesgos..."):
+                    # 1. Transformar todo el archivo
+                    df_ready = transformar_datos(df_csv, FEATURES_CONSENSUS)
+                    
+                    # 2. Predecir
+                    probs = realizar_prediccion(df_ready)
+                    
+                    # 3. Añadir resultados al DF original para descarga
+                    df_csv['Prob_Default'] = probs[:, 1]
+                    df_csv['Decision'] = df_csv['Prob_Default'].apply(lambda x: "Rechazado" if x > 0.5 else "Aprobado")
+
+                st.success("✅ Procesamiento completado")
                 st.dataframe(df_csv)
-                st.download_button("Descargar Resultados", df_csv.to_csv(index=False), "predicciones.csv")
+
+                # Botón de descarga
+                csv = df_csv.to_csv(index=False).encode('utf-8')
+                st.download_button("📥 Descargar Resultados (CSV)", data=csv, file_name="resultados_prediccion.csv")
 
 if __name__ == "__main__":
     main()
