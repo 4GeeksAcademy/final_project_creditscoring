@@ -4,6 +4,9 @@ import pickle
 import os
 from limpieza import transformar_datos  # Tu función con toda la codificación
 from utils import FEATURES_CONSENSUS    # La lista de columnas del modelo
+import joblib
+import lightgbm as lgb # Importante añadir esta línea
+
 
 # --- 1. FUNCIÓN DE PREDICCIÓN (Estilo Profesor) ---
 def realizar_prediccion(data):
