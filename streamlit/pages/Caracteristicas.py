@@ -82,9 +82,17 @@ def main():
     st.divider()
 
     # --- 4. SECCIÓN SHAP (IMPACTO GLOBAL) ---
-    st.header("🎯 Main Drivers of Default Risk (SHAP)")
-    st.write("El siguiente gráfico explica qué variables influyen más en que el modelo prediga un 'Default' (Impago).")
-
+    st.header("🎯 ### 🔍 Interpretación del Análisis de Riesgo (SHAP)")
+    st.write('''
+        Este gráfico de valores SHAP permite abrir la **"caja negra"** del modelo de Inteligencia Artificial para entender qué factores pesan más al decidir si un crédito es riesgoso o no. 
+    
+    * **Orden de Importancia**: Las variables están ordenadas de arriba hacia abajo; las de arriba (como `sub_grade` y `term`) son las que más influyen en el resultado final. 
+    * **Impacto en el Riesgo**:
+        * Los puntos hacia la **derecha** (valores positivos) aumentan la probabilidad de que el cliente caiga en incumplimiento (Default).
+        * Los puntos hacia la **izquierda** (valores negativos) indican factores que dan confianza y reducen el riesgo.
+    * **Código de Colores**: 
+        * El color **rojo** representa valores altos de esa variable y el **azul** valores bajos. Por ejemplo, se observa que plazos más largos (`term` en rojo) empujan el riesgo hacia la derecha.
+    ''')
     if not SHAP_AVAILABLE:
         st.error("❌ La librería 'shap' no está instalada. Verifica que 'requirements.txt' esté en la raíz del repositorio.")
     
