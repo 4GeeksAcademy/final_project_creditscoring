@@ -7,15 +7,23 @@ from utils import FEATURES_CONSENSUS    # La lista de columnas del modelo
 
 # --- 1. FUNCIÓN DE PREDICCIÓN (Estilo Profesor) ---
 def realizar_prediccion(data):
-    """Carga el modelo y devuelve las probabilidades"""
-    # Ajusta esta ruta a tu ubicación exacta
     path = 'notebooks/credit_risk_model_bundle.pkl'
-    with open(path, "rb") as f:
-        bundle = pickle.load(f)
-    
-    # Extraer el modelo si viene en un diccionario
-    model = bundle['model'] if isinstance(bundle, dict) else bundle
-    return model.predict_proba(data)
+    try:
+        # Usamos joblib que es más flexible que pickle para modelos
+        import joblib
+        bundle = joblib.load(path)
+        
+        if isinstance(bundle, dict):
+            model = bundle.get('model', bundle)
+        else:
+            model = bundle
+        return model.predict_proba(data)
+    except Exception as e:
+        st.error(f"Error al cargar el modelo: {e}")
+        # Si falla joblib, intentamos pickle como último recurso
+        import pickle
+        with open(path, "rb") as f:
+            return pickle.load(f).predict_proba(data)
 
 def main():
     st.set_page_config(page_title="Predicción de Riesgo", page_icon="📈", layout="wide")
