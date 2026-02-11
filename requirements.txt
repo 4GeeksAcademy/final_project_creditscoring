@@ -1,9 +1,8 @@
+streamlit==1.40.0
 pandas
 numpy
-matplotlib
-seaborn
 scikit-learn
-kagglehub
-streamlit
+joblib
+lightgbm
 shap
-Pillow
+numba
