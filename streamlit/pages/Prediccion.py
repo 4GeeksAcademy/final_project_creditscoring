@@ -115,7 +115,13 @@ def main():
                     df_csv['Decision'] = df_csv['Prob_Default'].apply(lambda x: "Rechazado" if x > 0.5 else "Aprobado")
 
                 st.success("✅ Procesamiento completado")
-                st.dataframe(df_csv)
+                columnas_a_mostrar = ['loan_amnt', 'term', 'grade', 'annual_inc', 'Prob_Default', 'Decision']
+                
+                # Verificamos que existan en tu DF para no dar error
+                cols_finales = [c for c in columnas_a_mostrar if c in df_csv.columns]
+                
+                st.subheader("📊 Resumen de Decisiones")
+                st.dataframe(df_csv[cols_finales].style.format({'Prob_Default': '{:.2%}'}))
 
                 # Botón de descarga
                 csv = df_csv.to_csv(index=False).encode('utf-8')
