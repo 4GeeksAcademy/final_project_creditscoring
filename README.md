@@ -1,48 +1,48 @@
 # final_project_creditscoring
 
-# Objetivo general
-Desarrollar un modelo de Credit Scoring basado en Machine Learning que permita predecir el riesgo de impago de los clientes de retail.
-#Objetivos específicos
-- Reducir pérdidas financieras por créditos impagos
-- Mejorar la toma de decisiones en la aprobación de crédito
-- Clasificar clientes según su nivel de riesgo
-- Automatizar y estandarizar el proceso de evaluación crediticia
+# General Objective
+Develop a credit risk model to estimate the probability of default and rank customers according to their risk level.
 
-Los datos utilizados en este proyecto provienen del Lending Club Loan Data, un conjunto de datos públicos de préstamos emitidos por la plataforma de financiamiento peer-to-peer Lending Club en Estados Unidos. Este dataset incluye información de los solicitantes, características de los préstamos y el estado final de los mismos, lo que permite analizar y predecir el riesgo de impago.
+## Specific Objectives
+- Reduce financial losses from unpaid credits.
+- Improve decision-making in credit approval.
+- Classify customers according to their risk level.
+- Automate and standardize the credit evaluation process.
 
-## Variables de entrada
+The data used in this project comes from the Lending Club Loan Data, a public dataset of loans issued by the peer-to-peer lending platform Lending Club in the United States. This dataset includes applicant information, loan characteristics, and final loan status, allowing for the analysis and prediction of default risk.
 
-### A) Características del préstamo
-•	loan_amnt → monto solicitado
-•	term → duración del préstamo (36/60 meses)
-•	int_rate → tasa de interés
-•	installment → valor mensual a pagar
-•	purpose → motivo del préstamo (educación, coche, vivienda…)
-•	grade / sub_grade → calificación interna del cliente
-### B) Características financieras del solicitante
-•	annual_inc → ingreso anual
-•	dti → ratio deuda-ingreso
-•	revol_bal → deuda rotativa actual
-•	revol_util → porcentaje de utilización de la línea de crédito
-•	total_acc → número total de cuentas de crédito
-•	open_acc → cuentas abiertas
-•	pub_rec → registros públicos negativos (ej. quiebras)
-•	delinq_2yrs → número de atrasos en los últimos 2 años
-### C) Historial crediticio
-•	earliest_cr_line → fecha de apertura de la primera línea de crédito
-•	inq_last_6mths → consultas de crédito recientes
-•	mths
+# Input Variables
+## A) Loan Characteristics
+- loan_amnt → requested amount
+- term → loan duration (36/60 months)
+- int_rate → interest rate
+- installment → monthly payment amount
+- purpose → reason for the loan (education, car, housing, etc.)
+- grade / sub_grade → internal customer rating
 
-## Variable de salida (target)
-Variable objetivo (y): loan_status reclasificada como binaria
+## B) Applicant’s Financial Characteristics
+- annual_inc → annual income
+- dti → debt-to-income ratio
+- revol_bal → current revolving debt
+- revol_util → credit line utilization percentage
+- total_acc → total number of credit accounts
+- open_acc → open accounts
+- pub_rec → negative public records (e.g., bankruptcies)
+- delinq_2yrs → number of delinquencies in the last 2 years
 
-El modelo aprende a partir de datos históricos para predecir la probabilidad de impago de un nuevo solicitante, además también se tiene se tendrá en cuenta variables macroeconómicas y cómo estas podrían afectar al incumplimiento del pago.
+## C) Credit History
+- earliest_cr_line → date the first credit line was opened
+- inq_last_6mths → recent credit inquiries
+- mths (mths_since_last_delinq) → months since last delinquency
 
-## Preguntas clave que el análisis de datos debe responder
-¿Qué características de un cliente están más asociadas al impago?
-¿Cuál es la probabilidad de que un cliente no pague su crédito?
-¿Qué clientes representan mayor riesgo crediticio?
-¿Dónde establecer el umbral de aprobación del crédito?
-¿Cómo impacta el monto del crédito en la probabilidad de impago?
+# Output Variable (Target)
+Target variable (y): loan_status reclassified as binary.
 
+The model learns from historical data to predict the probability of default for a new applicant. Additionally, macroeconomic variables and their potential impact on payment default will also be taken into account.
 
+# Key Questions the Data Analysis Should Answer
+- Which customer characteristics are most strongly associated with default?
+- What is the probability that a customer will not pay their credit?
+- Which customers represent the highest credit risk?
+- Where should the credit approval threshold be set?
+- How does the loan amount impact the probability of default?
